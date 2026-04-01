@@ -1,0 +1,30 @@
+name: demo_simulated
+description: >
+  Demo run using the simulated provider. No API keys needed.
+  Useful for testing the harness itself.
+
+tasks_dir: tasks
+
+configs:
+  - name: fast-model
+    provider: simulate
+    model: simulated-fast
+    extra:
+      simulated_output: |
+        host: db.prod.internal
+        port: 5432
+        ssl_enabled: true
+        cache:
+        logging:
+
+  - name: slow-model
+    provider: simulate
+    model: simulated-slow
+    extra:
+      simulated_output: |
+        {"files_changed": [{"path": "src/auth/middleware.py", "action": "modified"}], "summary": "Updated auth", "breaking_change": true, "categories": ["feature"]}
+
+iterations: 2
+timeout_seconds: 10
+max_retries: 0
+output_dir: reports

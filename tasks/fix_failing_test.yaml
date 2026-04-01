@@ -1,0 +1,48 @@
+id: fix_failing_test
+name: Fix a failing Python test
+description: |
+  Given a Python function and a failing test, identify the bug and
+  return the corrected function. Tests debugging and code comprehension.
+category: code_edit
+difficulty: medium
+tags: [python, test, debug, fix]
+
+prompt: |
+  The following Python function has a bug that causes the test below to fail.
+  Fix the function so the test passes. Return ONLY the corrected function,
+  no explanation.
+
+  Function:
+  ```python
+  def merge_sorted(a: list[int], b: list[int]) -> list[int]:
+      result = []
+      i = j = 0
+      while i < len(a) and j < len(b):
+          if a[i] <= b[j]:
+              result.append(a[i])
+              i += 1
+          else:
+              result.append(b[j])
+              j += 1
+      return result
+  ```
+
+  Failing test:
+  ```python
+  def test_merge_sorted():
+      assert merge_sorted([1, 3, 5], [2, 4, 6]) == [1, 2, 3, 4, 5, 6]
+      assert merge_sorted([1], []) == [1]
+      assert merge_sorted([], [2]) == [2]
+  ```
+
+  The test fails on `merge_sorted([1, 3, 5], [2, 4, 6])` — the result
+  is `[1, 2, 3, 4, 5]` instead of `[1, 2, 3, 4, 5, 6]`.
+
+expected:
+  contains:
+    - "result.extend"
+    - "a[i:]"
+    - "b[j:]"
+
+scoring:
+  mode: contains

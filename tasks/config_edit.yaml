@@ -1,0 +1,38 @@
+id: config_edit
+name: Edit a configuration file
+description: |
+  Given a YAML config file, update specific values without breaking
+  the structure. Tests precision and format preservation.
+category: code_edit
+difficulty: easy
+tags: [yaml, config, edit, precision]
+
+prompt: |
+  Edit the following YAML configuration file. Change the database host
+  from "localhost" to "db.prod.internal", set the port to 5432, and
+  enable SSL by setting ssl_enabled to true. Return ONLY the updated
+  YAML, no explanation.
+
+context:
+  config.yaml: |
+    database:
+      host: localhost
+      port: 3306
+      name: myapp
+      ssl_enabled: false
+    cache:
+      host: localhost
+      ttl: 3600
+    logging:
+      level: info
+
+expected:
+  contains:
+    - "host: db.prod.internal"
+    - "port: 5432"
+    - "ssl_enabled: true"
+    - "cache:"
+    - "logging:"
+
+scoring:
+  mode: contains

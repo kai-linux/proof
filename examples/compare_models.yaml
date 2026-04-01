@@ -1,0 +1,27 @@
+name: claude_vs_gpt4o
+description: >
+  Compare Claude Sonnet 4 vs GPT-4o on coding agent tasks.
+  Tests config editing, bug fixing, and structured output generation.
+
+tasks_dir: tasks
+
+configs:
+  - name: claude-sonnet
+    provider: anthropic
+    model: claude-sonnet-4-20250514
+    temperature: 0.0
+    max_tokens: 4096
+    system_prompt: "You are a precise coding assistant. Follow instructions exactly. Return only what is asked for, no explanations."
+
+  - name: gpt-4o
+    provider: openai
+    model: gpt-4o
+    temperature: 0.0
+    max_tokens: 4096
+    system_prompt: "You are a precise coding assistant. Follow instructions exactly. Return only what is asked for, no explanations."
+
+iterations: 3
+timeout_seconds: 60
+max_retries: 1
+fallback_config: claude-sonnet
+output_dir: reports

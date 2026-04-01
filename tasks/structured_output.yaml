@@ -1,0 +1,37 @@
+id: structured_output
+name: Generate structured JSON from unstructured text
+description: |
+  Given a natural language description of a git diff, produce a structured
+  JSON summary. Tests schema adherence and information extraction.
+category: generation
+difficulty: hard
+tags: [json, schema, extraction, structured]
+
+prompt: |
+  Parse the following git diff summary into a JSON object with this exact schema:
+  {
+    "files_changed": [{"path": string, "action": "added"|"modified"|"deleted", "lines_added": int, "lines_removed": int}],
+    "summary": string (one sentence),
+    "breaking_change": boolean,
+    "categories": string[] (from: "feature", "bugfix", "refactor", "docs", "test", "chore")
+  }
+
+  Diff summary:
+  Modified src/auth/middleware.py: added 45 lines, removed 12 lines — replaced JWT validation
+  with OAuth2 token introspection. This changes the auth header format from Bearer <jwt> to
+  Bearer <opaque>, which breaks all existing API clients.
+  Added src/auth/oauth2.py: 120 new lines — new OAuth2 client wrapper.
+  Modified tests/test_auth.py: added 60 lines, removed 30 lines — updated test suite.
+  Deleted src/auth/jwt_utils.py: removed 85 lines.
+
+  Return ONLY valid JSON, no markdown fences, no explanation.
+
+expected:
+  required_keys:
+    - files_changed
+    - summary
+    - breaking_change
+    - categories
+
+scoring:
+  mode: json_schema

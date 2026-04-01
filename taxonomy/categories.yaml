@@ -1,0 +1,68 @@
+# Proof Failure Taxonomy
+# These categories classify every task outcome for structured analysis.
+
+success_states:
+  success:
+    description: Task completed correctly on first attempt
+    severity: 0
+  retry_recovery:
+    description: Failed initially but succeeded after retry
+    severity: 1
+  fallback_recovery:
+    description: Primary model failed, fallback model succeeded
+    severity: 1
+
+partial_failures:
+  partial_completion:
+    description: Task partially completed, missing required elements
+    severity: 2
+    examples:
+      - "Generated 2 of 3 required files"
+      - "Config updated but comments stripped"
+  formatting_failure:
+    description: Output exists but doesn't match expected format
+    severity: 2
+    examples:
+      - "Returned markdown-fenced JSON instead of raw JSON"
+      - "Added explanation when only code was requested"
+  schema_violation:
+    description: Output violates the expected schema or structure
+    severity: 2
+    examples:
+      - "JSON missing required keys"
+      - "YAML with wrong indentation breaking parsing"
+
+hard_failures:
+  wrong_file_modified:
+    description: Modified incorrect file or resource
+    severity: 3
+    examples:
+      - "Edited test file instead of source file"
+      - "Modified config.yaml instead of config.prod.yaml"
+  hallucinated_success:
+    description: Claimed success but output is incorrect
+    severity: 3
+    examples:
+      - "Said 'Done!' but function still has the bug"
+      - "Returned 'fixed' code identical to input"
+  tool_failure:
+    description: Tool call failed or returned unexpected error
+    severity: 3
+    examples:
+      - "API returned 500"
+      - "File read tool failed with permission error"
+  timeout:
+    description: Task exceeded time limit
+    severity: 3
+  auth_error:
+    description: Authentication or authorization failure
+    severity: 3
+  rate_limit:
+    description: Rate limited by provider
+    severity: 3
+  context_overflow:
+    description: Input exceeded model context window
+    severity: 3
+  unknown_error:
+    description: Unclassified failure
+    severity: 3
