@@ -107,6 +107,24 @@ def test_adopted_verified_outcome_without_attempt_cost_is_not_free():
     assert report["metrics"]["cost_per_verified_task_usd"] is None
 
 
+def test_historical_reconciliation_does_not_invent_fast_current_delivery():
+    data = observations()
+    data["goals"][0]["historical_import"] = True
+    data["attempts"] = []
+    metrics = summarize_operations(data)["metrics"]
+    assert metrics["verified_delivery"]["denominator"] == 0
+    assert metrics["p95_delivery_seconds"] is None
+    assert metrics["historical_imports"] == 1
+
+
+def test_failed_source_reconciliation_is_visible_even_with_fresh_heartbeat():
+    data = observations()
+    data["health"] = [
+        {"component": "source_reconciliation", "observed_at": 990, "state": "1 source reads failed"}
+    ]
+    assert any(a["code"] == "component_unhealthy" for a in summarize_operations(data)["alerts"])
+
+
 def test_current_revision_is_required_for_acceptance():
     data = observations()
     data["goals"][0]["revision"] = 2
