@@ -41,6 +41,11 @@ def main() -> None:
     # report
     report_parser = subparsers.add_parser("report", help="Regenerate report from JSON")
     report_parser.add_argument("json_file", help="Path to JSON results file")
+    operations_parser = subparsers.add_parser(
+        "operations", help="Report live delivery observations, separately from benchmarks"
+    )
+    operations_parser.add_argument("json_file", help="proof.observations.v1 export")
+    operations_parser.add_argument("--output", default="dashboards/operations")
 
     args = parser.parse_args()
 
@@ -50,6 +55,14 @@ def main() -> None:
         _cmd_list(args)
     elif args.command == "report":
         _cmd_report(args)
+    elif args.command == "operations":
+        import json
+
+        from .operations import write_operations_report
+
+        data = json.loads(Path(args.json_file).read_text(encoding="utf-8"))
+        summary = write_operations_report(data, args.output)
+        print(json.dumps(summary["metrics"], indent=2))
     else:
         parser.print_help()
         sys.exit(1)
@@ -106,6 +119,7 @@ def _cmd_list(args: argparse.Namespace) -> None:
 def _cmd_report(args: argparse.Namespace) -> None:
     """Regenerate a markdown report from existing JSON results."""
     import json
+
     from .cost import TokenUsage
     from .runner import TaskResult
     from .scorer import ScoreResult
@@ -117,25 +131,27 @@ def _cmd_report(args: argparse.Namespace) -> None:
 
     results = []
     for r in data.get("results", []):
-        results.append(TaskResult(
-            task_id=r["task_id"],
-            config_name=r["config_name"],
-            iteration=r["iteration"],
-            output="",
-            score=ScoreResult(
-                passed=r["passed"],
-                score=r["score"],
-                failure_category=FailureCategory(r["failure_category"]),
-            ),
-            latency_ms=r["latency_ms"],
-            tokens=TokenUsage(
-                input_tokens=r.get("input_tokens", 0),
-                output_tokens=r.get("output_tokens", 0),
-            ),
-            retries=r.get("retries", 0),
-            used_fallback=r.get("used_fallback", False),
-            error=r.get("error"),
-        ))
+        results.append(
+            TaskResult(
+                task_id=r["task_id"],
+                config_name=r["config_name"],
+                iteration=r["iteration"],
+                output="",
+                score=ScoreResult(
+                    passed=r["passed"],
+                    score=r["score"],
+                    failure_category=FailureCategory(r["failure_category"]),
+                ),
+                latency_ms=r["latency_ms"],
+                tokens=TokenUsage(
+                    input_tokens=r.get("input_tokens", 0),
+                    output_tokens=r.get("output_tokens", 0),
+                ),
+                retries=r.get("retries", 0),
+                used_fallback=r.get("used_fallback", False),
+                error=r.get("error"),
+            )
+        )
 
     summary = summarize(results, name=data.get("name", ""))
     md = generate_markdown_report(summary, results)
