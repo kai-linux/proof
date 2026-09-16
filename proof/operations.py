@@ -270,15 +270,20 @@ def summarize_operations(data):
     for a in attempts:
         day = datetime.fromtimestamp(timestamp(a["started_at"]), timezone.utc).date().isoformat()
         buckets[day]["started"] += 1
+    completions = {}
     for event in data.get("events", []):
         if (
             event.get("state") == "succeeded"
             and verified.get(event.get("goal_id"), False)
+            and not by_id[event["goal_id"]].get("historical_import")
             and event.get("revision", by_id[event["goal_id"]]["revision"])
             == by_id[event["goal_id"]]["revision"]
         ):
-            day = datetime.fromtimestamp(timestamp(event["at"]), timezone.utc).date().isoformat()
-            buckets[day]["verified"] += 1
+            ident, at = event["goal_id"], timestamp(event["at"])
+            completions[ident] = min(completions.get(ident, at), at)
+    for at in completions.values():
+        day = datetime.fromtimestamp(at, timezone.utc).date().isoformat()
+        buckets[day]["verified"] += 1
     return {
         "schema": "proof.operations.v1",
         "observed_at": now,

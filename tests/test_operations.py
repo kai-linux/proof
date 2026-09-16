@@ -111,10 +111,29 @@ def test_historical_reconciliation_does_not_invent_fast_current_delivery():
     data = observations()
     data["goals"][0]["historical_import"] = True
     data["attempts"] = []
-    metrics = summarize_operations(data)["metrics"]
+    report = summarize_operations(data)
+    metrics = report["metrics"]
     assert metrics["verified_delivery"]["denominator"] == 0
     assert metrics["p95_delivery_seconds"] is None
     assert metrics["historical_imports"] == 1
+    assert report["timeline"] == []
+
+
+@pytest.mark.parametrize("reverse_events", [False, True])
+def test_delivery_timeline_counts_a_current_outcome_once(reverse_events):
+    data = observations()
+    data["observed_at"] = 100000
+    data["events"].extend(
+        [
+            {"goal_id": "g1", "at": 87000, "state": "succeeded", "revision": 1},
+            {"goal_id": "g1", "at": 10, "state": "succeeded", "revision": 0},
+        ]
+    )
+    if reverse_events:
+        data["events"].reverse()
+    assert summarize_operations(data)["timeline"] == [
+        {"date": "1970-01-01", "started": 1, "verified": 1}
+    ]
 
 
 def test_failed_source_reconciliation_is_visible_even_with_fresh_heartbeat():
