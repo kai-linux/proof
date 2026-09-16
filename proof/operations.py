@@ -301,7 +301,9 @@ def summarize_operations(data):
             "reserved_unpriced_usd": reservations,
             "cost_coverage": len(actual_costs) / len(attempts) if attempts else None,
             "cost_per_verified_task_usd": sum(actual_costs) / delivered
-            if delivered and not unknown_costs
+            if delivered
+            and not unknown_costs
+            and all(attempts_per_goal[g["id"]] for g in leaves if verified[g["id"]])
             else None,
             "pending_notifications": notifications.get("pending", 0),
         },

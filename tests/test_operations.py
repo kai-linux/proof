@@ -99,6 +99,14 @@ def test_unknown_cost_does_not_become_zero_total():
     assert report["metrics"]["cost_coverage"] == 0
 
 
+def test_adopted_verified_outcome_without_attempt_cost_is_not_free():
+    data = observations()
+    data["attempts"] = []
+    report = summarize_operations(data)
+    assert report["metrics"]["verified_delivery"]["numerator"] == 1
+    assert report["metrics"]["cost_per_verified_task_usd"] is None
+
+
 def test_current_revision_is_required_for_acceptance():
     data = observations()
     data["goals"][0]["revision"] = 2
