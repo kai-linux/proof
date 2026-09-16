@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Proof | Delivery Operations</title>
+    <style>
+      :root {
+        --bg: #101a1a;
+        --panel: #172323;
+        --ink: #e8eee8;
+        --muted: #9bb0a9;
+        --line: #314340;
+        --mint: #a8dfc1;
+        --amber: #f4c67e;
+        --red: #ff9c8f;
+        --mono: "IBM Plex Mono", "Courier New", monospace;
+        --body: "Trebuchet MS", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 95% 0, #23443a70, transparent 45%),
+          var(--bg);
+        color: var(--ink);
+        font: 15px/1.55 var(--body);
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      a,
+      input,
+      select {
+        outline-offset: 5px;
+      }
+      a {
+        color: var(--mint);
+      }
+      button {
+        cursor: pointer;
+      }
+      header {
+        padding: 25px 4vw;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+      }
+      .brand {
+        font: 700 22px var(--mono);
+        letter-spacing: -1px;
+      }
+      .brand small {
+        color: var(--muted);
+        font: 12px var(--mono);
+        margin-left: 18px;
+        letter-spacing: 1px;
+      }
+      .status {
+        font: 12px var(--mono);
+        color: var(--mint);
+      }
+      .status.error {
+        color: var(--red);
+      }
+      main {
+        max-width: 1600px;
+        margin: auto;
+        padding: 34px 4vw 70px;
+      }
+      .eyebrow {
+        font: 11px var(--mono);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--mint);
+      }
+      h1 {
+        font:
+          normal clamp(35px, 5vw, 58px) / 1.13 Georgia,
+          serif;
+        letter-spacing: -1.8px;
+        margin: 12px 0;
+      }
+      h2 {
+        font:
+          normal 25px Georgia,
+          serif;
+        margin: 0 0 17px;
+      }
+      h3 {
+        font-size: 15px;
+        margin: 0 0 10px;
+      }
+      .lede {
+        color: var(--muted);
+        max-width: 720px;
+        margin: 0 0 28px;
+      }
+      .mast {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 22px;
+      }
+      .action {
+        background: transparent;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        padding: 10px 15px;
+        white-space: nowrap;
+      }
+      .action:hover {
+        border-color: var(--mint);
+      }
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border: 1px solid var(--line);
+        margin: 26px 0;
+      }
+      .kpi {
+        padding: 23px;
+        border-right: 1px solid var(--line);
+        background: linear-gradient(140deg, #a8dfc108, transparent);
+      }
+      .kpi:last-child {
+        border: 0;
+      }
+      .label {
+        font: 11px var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+      }
+      .value {
+        font: 40px/1.4 var(--mono);
+        letter-spacing: -2px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2.2fr) minmax(280px, 1fr);
+        gap: 22px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 23px;
+        margin-bottom: 22px;
+        min-width: 0;
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .count {
+        font: 12px var(--mono);
+        color: var(--muted);
+      }
+      .filters {
+        display: flex;
+        gap: 10px;
+        margin: 15px 0;
+      }
+      input,
+      select {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--ink);
+        border-radius: 3px;
+        padding: 10px;
+        min-width: 0;
+      }
+      input {
+        flex: 1;
+        width: 100%;
+      }
+      select {
+        max-width: 210px;
+      }
+      .goal {
+        display: grid;
+        grid-template-columns: minmax(150px, 1fr) 125px 105px;
+        gap: 12px;
+        align-items: center;
+        width: 100%;
+        border: 0;
+        border-top: 1px solid var(--line);
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        padding: 16px 3px;
+      }
+      .goal:hover,
+      .goal[aria-pressed="true"] {
+        background: #a8dfc10b;
+      }
+      .goal-title {
+        font-weight: 600;
+      }
+      .goal-meta {
+        font: 11px var(--mono);
+        color: var(--muted);
+        display: block;
+        margin-top: 4px;
+      }
+      .badge {
+        font: 11px var(--mono);
+        color: var(--amber);
+        text-transform: uppercase;
+      }
+      .badge.succeeded {
+        color: var(--mint);
+      }
+      .badge.failed,
+      .badge.cancelled {
+        color: var(--red);
+      }
+      .measure {
+        font: 12px var(--mono);
+        text-align: right;
+        color: var(--muted);
+      }
+      .empty {
+        color: var(--muted);
+        padding: 24px 0;
+      }
+      .alert {
+        border-left: 2px solid var(--amber);
+        padding: 0 0 0 12px;
+        margin: 17px 0;
+      }
+      .alert.critical {
+        border-color: var(--red);
+      }
+      .alert small {
+        font: 10px var(--mono);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+      .alert p {
+        font-size: 13px;
+        margin: 5px 0;
+      }
+      .detail dt {
+        color: var(--muted);
+        font: 11px var(--mono);
+        margin: 15px 0 4px;
+        text-transform: uppercase;
+      }
+      .detail dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .detail .goal-id {
+        font: 12px var(--mono);
+      }
+      .chart {
+        display: flex;
+        align-items: end;
+        height: 130px;
+        gap: 5px;
+        margin-top: 15px;
+      }
+      .bar-group {
+        height: 100%;
+        flex: 1;
+        display: flex;
+        align-items: end;
+        gap: 2px;
+        min-width: 4px;
+      }
+      .bar {
+        width: 50%;
+        min-height: 1px;
+        background: var(--line);
+      }
+      .bar.verified {
+        background: var(--mint);
+      }
+      .legend {
+        font: 11px var(--mono);
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .mini-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+      }
+      .mini-grid strong {
+        display: block;
+        font: 24px var(--mono);
+        margin-top: 4px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13px;
+      }
+      th {
+        text-align: left;
+        color: var(--muted);
+        font: 10px var(--mono);
+        text-transform: uppercase;
+      }
+      td,
+      th {
+        padding: 13px 9px;
+        border-bottom: 1px solid var(--line);
+      }
+      footer {
+        font: 11px var(--mono);
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        padding: 20px 4vw;
+      }
+      .notice {
+        color: var(--amber);
+        font-size: 13px;
+      }
+      .error-banner {
+        border: 1px solid var(--red);
+        padding: 14px;
+        margin-bottom: 20px;
+        color: var(--red);
+      }
+      [hidden] {
+        display: none !important;
+      }
+      @media (max-width: 1000px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .side {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+        }
+        .side .panel {
+          margin: 0;
+        }
+        .kpi {
+          padding: 17px;
+        }
+        .value {
+          font-size: 32px;
+        }
+      }
+      @media (max-width: 620px) {
+        header {
+          align-items: start;
+        }
+        .brand small {
+          display: block;
+          margin: 5px 0;
+        }
+        .mast {
+          display: block;
+        }
+        .mast .action {
+          margin-bottom: 15px;
+        }
+        .kpis {
+          grid-template-columns: 1fr 1fr;
+        }
+        .kpi:nth-child(2) {
+          border-right: 0;
+        }
+        .kpi:nth-child(-n + 2) {
+          border-bottom: 1px solid var(--line);
+        }
+        .layout,
+        .side {
+          display: block;
+        }
+        .side .panel {
+          margin-bottom: 20px;
+        }
+        .panel {
+          padding: 18px;
+        }
+        .filters {
+          flex-wrap: wrap;
+        }
+        .filters select {
+          max-width: none;
+          width: 100%;
+        }
+        .goal {
+          grid-template-columns: 1fr 100px;
+        }
+        .goal .measure {
+          display: none;
+        }
+        .status {
+          max-width: 145px;
+          text-align: right;
+        }
+        h1 {
+          letter-spacing: -1px;
+        }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        main {
+          animation: arrive 0.35s ease-out;
+        }
+        @keyframes arrive {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        proof<span aria-hidden="true">.</span><small>DELIVERY OPERATIONS</small>
+      </div>
+      <div id="freshness" class="status" role="status" aria-live="polite">
+        Connecting to observations
+      </div>
+    </header>
+    <main>
+      <div id="error" class="error-banner" role="alert" hidden></div>
+      <div class="mast">
+        <div>
+          <div class="eyebrow">Agent-OS / operational evidence</div>
+          <h1>From intent<br />to delivered outcomes.</h1>
+          <p class="lede">
+            Programs, people decisions, workers and proof of delivery.
+            Completion claims and verified results are counted separately.
+          </p>
+        </div>
+        <button class="action" id="refresh">Refresh observations</button>
+      </div>
+      <section class="kpis" aria-label="Portfolio performance">
+        <div class="kpi">
+          <div class="label">Verified delivery</div>
+          <div class="value" id="verified">--</div>
+          <div class="sub" id="denominator">No acceptance observations yet</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Active workers</div>
+          <div class="value" id="active">--</div>
+          <div class="sub">Current revision and live lease</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Waiting / verifying</div>
+          <div class="value" id="waiting">--</div>
+          <div class="sub">Owned work awaiting the next condition</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Known provider cost</div>
+          <div class="value" id="cost">--</div>
+          <div class="sub" id="cost-coverage">
+            Unknown cost is not zero cost
+          </div>
+        </div>
+      </section>
+      <div class="layout">
+        <div>
+          <section class="panel">
+            <div class="section-head">
+              <h2>Delivery portfolio</h2>
+              <span id="goal-count" class="count"></span>
+            </div>
+            <div class="filters">
+              <input
+                id="search"
+                type="search"
+                placeholder="Find a program, project or task"
+                aria-label="Search goals"
+              /><select id="state" aria-label="Filter by state">
+                <option value="">All states</option>
+                <option>ready</option>
+                <option>running</option>
+                <option>waiting</option>
+                <option>verifying</option>
+                <option>paused</option>
+                <option>succeeded</option>
+                <option>failed</option>
+                <option>cancelled</option></select
+              ><select id="program" aria-label="Filter by program">
+                <option value="">All programs</option>
+              </select>
+            </div>
+            <div id="goals"></div>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <h2>Execution and delivery</h2>
+              <span class="count">LAST 30 OBSERVED DAYS</span>
+            </div>
+            <div
+              id="timeline"
+              class="chart"
+              role="img"
+              aria-label="Daily attempts started and verified goal completions"
+            ></div>
+            <div class="legend">
+              <span>Dark: attempts started / Mint: goals verified</span
+              ><span id="timeline-window"></span>
+            </div>
+            <div class="mini-grid">
+              <div>
+                <span class="label">P95 intent-to-delivery time</span>
+                <strong id="delivery-latency">--</strong>
+                <span class="sub" id="delivery-latency-count"></span>
+              </div>
+              <div>
+                <span class="label">On-time verified delivery</span>
+                <strong id="on-time">--</strong>
+                <span class="sub" id="on-time-count"></span>
+              </div>
+              <div>
+                <span class="label">P95 attempt duration</span
+                ><strong id="latency">--</strong
+                ><span class="sub" id="latency-count"></span>
+              </div>
+              <div>
+                <span class="label">Retry attempts</span
+                ><strong id="retries">--</strong
+                ><span class="sub">All providers in the same goal lineage</span>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <h2>Worker performance</h2>
+            <p class="sub">
+              Reported complete describes an attempt. It does not establish that
+              the goal was delivered.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Worker / provider</th>
+                    <th>Attempts</th>
+                    <th>Reported complete</th>
+                    <th>Known cost</th>
+                    <th>Unpriced</th>
+                  </tr>
+                </thead>
+                <tbody id="workers"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="panel">
+            <h2>Observation coverage</h2>
+            <p id="coverage" class="sub"></p>
+            <p id="legacy" class="sub"></p>
+            <div id="taxonomy"></div>
+          </section>
+        </div>
+        <aside class="side">
+          <section class="panel">
+            <div class="eyebrow">Needs attention</div>
+            <h2>Risks and signals</h2>
+            <div id="alerts"></div>
+          </section>
+          <section class="panel">
+            <div class="eyebrow">Delivery record</div>
+            <h2 id="detail-title">Select a commitment</h2>
+            <div id="detail" class="detail">
+              <p class="sub">
+                Inspect scope ownership, acceptance and the next action. GitHub
+                remains the planning interface.
+              </p>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+    <footer>
+      PROOF / Live operational observations. Empty or stale data never implies
+      success. All amounts are USD.
+    </footer>
+    <script>
+      "use strict";
+      const initialData = __INITIAL_DATA__;
+      const dataUrl = __DATA_URL__;
+      let data = null,
+        selected = null,
+        fetching = false,
+        lastReceived = null;
+      const $ = (id) => document.getElementById(id);
+      const node = (tag, text, cls) => {
+        const e = document.createElement(tag);
+        if (text !== undefined) e.textContent = text;
+        if (cls) e.className = cls;
+        return e;
+      };
+      const money = (n) =>
+        n === null || n === undefined ? "Unknown" : "$" + Number(n).toFixed(2);
+      const duration = (n) =>
+        n === null || n === undefined
+          ? "Unknown"
+          : n < 60
+            ? Math.round(n) + "s"
+            : n < 3600
+              ? Math.round(n / 60) + "m"
+              : (n / 3600).toFixed(1) + "h";
+      function showDetails(g) {
+        selected = g.id;
+        $("detail-title").textContent = g.title;
+        const d = $("detail");
+        d.replaceChildren();
+        const dl = node("dl");
+        const rows = [
+          ["Identity", g.id + " / revision " + g.revision],
+          [
+            "Ownership",
+            g.kind +
+              (g.parent_id ? " under " + g.parent_id : " / top-level intent"),
+          ],
+          [
+            "State",
+            g.state +
+              (g.verified
+                ? " / acceptance verified"
+                : " / outcome not verified"),
+          ],
+          ["Next condition", g.reason || "Ready for scoped execution"],
+          [
+            "Work packages",
+            g.children_verified + " / " + g.children_total + " verified",
+          ],
+          ["Attempts", String(g.attempt_count)],
+          [
+            "Deadline",
+            g.deadline
+              ? new Date(g.deadline).toLocaleString()
+              : "Not specified",
+          ],
+          [
+            "Budget",
+            g.budget_usd === null || g.budget_usd === undefined
+              ? "Not specified"
+              : money(g.budget_usd),
+          ],
+          [
+            "Acceptance checks",
+            (g.required_checks || []).join(", ") || "Human acceptance required",
+          ],
+        ];
+        for (const [key, value] of rows) {
+          dl.append(node("dt", key), node("dd", value));
+        }
+        d.append(dl);
+        if (g.issue_url && /^https:\/\/github\.com\//.test(g.issue_url)) {
+          const a = node("a", "Open delivery issue");
+          a.href = g.issue_url;
+          a.rel = "noopener noreferrer";
+          a.target = "_blank";
+          d.append(a);
+        }
+        renderGoals();
+      }
+      function inProgram(g, id) {
+        const seen = new Set();
+        while (g && !seen.has(g.id)) {
+          if (g.id === id) return true;
+          seen.add(g.id);
+          g = data.goals.find((x) => x.id === g.parent_id);
+        }
+        return false;
+      }
+      function renderGoals() {
+        if (!data) return;
+        const q = $("search").value.toLowerCase(),
+          s = $("state").value,
+          p = $("program").value;
+        const list = data.goals.filter(
+          (g) =>
+            (!q || (g.title + " " + g.id).toLowerCase().includes(q)) &&
+            (!s || g.state === s) &&
+            (!p || inProgram(g, p)),
+        );
+        $("goal-count").textContent =
+          list.length + " / " + data.goals.length + " commitments";
+        $("goals").replaceChildren();
+        if (!list.length)
+          $("goals").append(
+            node(
+              "p",
+              data.goals.length
+                ? "No commitments match these filters."
+                : "No managed goals recorded yet. Promote a scoped issue to Ready to begin.",
+              "empty",
+            ),
+          );
+        for (const g of list) {
+          const b = node("button", undefined, "goal");
+          b.setAttribute("aria-pressed", String(selected === g.id));
+          const title = node("span", g.title, "goal-title");
+          title.append(
+            node(
+              "small",
+              g.kind.toUpperCase() +
+                " / " +
+                g.id +
+                (g.parent_id ? " / child work" : ""),
+              "goal-meta",
+            ),
+          );
+          b.append(
+            title,
+            node("span", g.state, "badge " + g.state),
+            node(
+              "span",
+              g.children_total
+                ? g.children_verified + "/" + g.children_total + " verified"
+                : g.attempt_count + " attempts",
+              "measure",
+            ),
+          );
+          b.onclick = () => showDetails(g);
+          $("goals").append(b);
+        }
+      }
+      function render(snapshot) {
+        if (snapshot.schema !== "proof.operations.v1")
+          throw Error("Unsupported observation schema");
+        data = snapshot;
+        const m = data.metrics;
+        $("verified").textContent =
+          m.verified_delivery.value === null
+            ? "Unknown"
+            : Math.round(m.verified_delivery.value * 100) + "%";
+        $("denominator").textContent =
+          m.verified_delivery.numerator +
+          " / " +
+          m.verified_delivery.denominator +
+          " accepted tasks";
+        $("verified").title = m.verified_delivery.definition;
+        $("active").textContent = m.active_workers;
+        $("waiting").textContent = m.waiting + " / " + m.pending_verification;
+        $("cost").textContent = m.attempts
+          ? money(m.known_cost_usd)
+          : "Unknown";
+        $("cost-coverage").textContent = m.unknown_cost_attempts
+          ? m.unknown_cost_attempts + " unpriced attempts; total is incomplete"
+          : "Actual cost coverage: " +
+            (m.cost_coverage === null
+              ? "unknown"
+              : Math.round(m.cost_coverage * 100) + "%");
+        $("latency").textContent = duration(m.p95_attempt_seconds);
+        $("latency-count").textContent =
+          m.latency_samples + " completed attempt observations";
+        $("delivery-latency").textContent = duration(m.p95_delivery_seconds);
+        $("delivery-latency-count").textContent =
+          m.delivery_latency_samples +
+          " verified task outcomes, including waits";
+        $("on-time").textContent =
+          m.on_time_delivery.value === null
+            ? "Unknown"
+            : Math.round(m.on_time_delivery.value * 100) + "%";
+        $("on-time-count").textContent =
+          m.on_time_delivery.numerator +
+          " / " +
+          m.on_time_delivery.denominator +
+          " delivered tasks with a declared deadline";
+        $("retries").textContent = m.retries;
+        $("coverage").textContent =
+          m.attempts +
+          " managed attempts. " +
+          m.pending_notifications +
+          " undelivered status updates. Reservations for unpriced attempts: " +
+          money(m.reserved_unpriced_usd) +
+          ". Delivery rate includes unfinished accepted tasks; it is not a model benchmark score.";
+        const legacy = data.legacy || {};
+        $("legacy").textContent = legacy.records
+          ? legacy.records +
+            " retained legacy task records (" +
+            legacy.reported_complete +
+            " reported complete). They lack goal-level proof and are excluded from verified-delivery KPIs."
+          : "No legacy task records included.";
+        const previous = $("program").value;
+        $("program").replaceChildren(node("option", "All programs"));
+        $("program").firstChild.value = "";
+        for (const g of data.goals.filter(
+          (g) => g.kind === "program" || (!g.parent_id && g.kind === "project"),
+        )) {
+          const o = node("option", g.title);
+          o.value = g.id;
+          $("program").append(o);
+        }
+        $("program").value = previous;
+        $("alerts").replaceChildren();
+        for (const a of [
+          ...data.alerts,
+          ...(data.risks || []).map((r) => ({
+            code: "reported_risk",
+            severity: "warning",
+            message: r.note,
+            goal_id: r.goal_id,
+          })),
+        ]) {
+          const box = node("div", undefined, "alert " + a.severity);
+          box.append(
+            node("small", a.code.replaceAll("_", " ")),
+            node("p", a.message),
+          );
+          if (a.goal_id) {
+            const b = node("button", "Inspect goal", "action");
+            b.onclick = () => {
+              const g = data.goals.find((g) => g.id === a.goal_id);
+              if (g) showDetails(g);
+            };
+            box.append(b);
+          }
+          $("alerts").append(box);
+        }
+        if (!$("alerts").children.length)
+          $("alerts").append(
+            node(
+              "p",
+              m.attempts
+                ? "No current invariant violations detected. This is not proof of unrestricted autonomy."
+                : "No execution observations yet. Readiness is unproven.",
+              "sub",
+            ),
+          );
+        $("workers").replaceChildren();
+        for (const w of data.workers) {
+          const tr = node("tr");
+          for (const v of [
+            w.name,
+            w.attempts,
+            w.reported_complete,
+            money(w.known_cost_usd),
+            w.unknown_costs,
+          ])
+            tr.append(node("td", v));
+          $("workers").append(tr);
+        }
+        $("taxonomy").replaceChildren();
+        for (const [name, count] of Object.entries(data.failure_taxonomy))
+          $("taxonomy").append(node("p", name + ": " + count, "sub"));
+        $("timeline").replaceChildren();
+        const max = Math.max(
+          1,
+          ...data.timeline.map((d) => Math.max(d.started, d.verified)),
+        );
+        for (const d of data.timeline) {
+          const g = node("div", undefined, "bar-group");
+          g.title =
+            d.date + ": " + d.started + " started, " + d.verified + " verified";
+          for (const [key, cls] of [
+            ["started", ""],
+            ["verified", "verified"],
+          ]) {
+            const b = node("div", undefined, "bar " + cls);
+            b.style.height = (d[key] / max) * 100 + "%";
+            g.append(b);
+          }
+          $("timeline").append(g);
+        }
+        $("timeline-window").textContent = data.timeline.length
+          ? data.timeline[0].date + " / " + data.timeline.at(-1).date
+          : "No observations";
+        renderGoals();
+        const current = data.goals.find((g) => g.id === selected);
+        if (current) showDetails(current);
+      }
+      async function refresh() {
+        if (fetching) return;
+        fetching = true;
+        $("refresh").disabled = true;
+        try {
+          const response = await fetch(dataUrl, {
+            cache: "no-store",
+            credentials: "same-origin",
+            signal: AbortSignal.timeout(10000),
+          });
+          if (!response.ok)
+            throw Error("Observation request failed (" + response.status + ")");
+          render(await response.json());
+          lastReceived = Date.now();
+          $("error").hidden = true;
+          $("freshness").className = "status";
+          $("freshness").textContent =
+            "Observed " +
+            new Date(data.observed_at * 1000).toLocaleTimeString();
+        } catch (e) {
+          $("error").textContent =
+            "Live observations unavailable. " +
+            (data
+              ? "Showing the last received snapshot; it may be stale."
+              : "No operational results can be inferred.");
+          $("error").hidden = false;
+          $("freshness").className = "status error";
+          $("freshness").textContent =
+            "OFFLINE / last snapshot " +
+            (lastReceived
+              ? duration((Date.now() - lastReceived) / 1000) + " ago"
+              : "unavailable");
+        } finally {
+          fetching = false;
+          $("refresh").disabled = false;
+        }
+      }
+      $("search").addEventListener("input", renderGoals);
+      $("state").addEventListener("change", renderGoals);
+      $("program").addEventListener("change", renderGoals);
+      $("refresh").addEventListener("click", refresh);
+      if (initialData) {
+        render(initialData);
+        $("freshness").textContent =
+          "Snapshot / " +
+          new Date(initialData.observed_at * 1000).toLocaleString();
+      }
+      if (location.protocol !== "file:") {
+        refresh();
+        setInterval(refresh, 10000);
+      }
+    </script>
+  </body>
+</html>
