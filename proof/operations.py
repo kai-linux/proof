@@ -103,6 +103,18 @@ def summarize_operations(data):
         return goal is None
 
     alerts = []
+    for component in data.get("health", []):
+        if component.get("state", "ok") != "ok":
+            alerts.append(
+                {
+                    "code": "component_unhealthy",
+                    "severity": "warning",
+                    "goal_id": None,
+                    "message": str(component.get("component", "unknown"))
+                    + ": "
+                    + str(component["state"]),
+                }
+            )
     coordinator = next(
         (h for h in data.get("health", []) if h.get("component") == "delivery_coordinator"), None
     )
@@ -183,7 +195,10 @@ def summarize_operations(data):
     leaves = [
         g
         for g in goals
-        if g["kind"] == "task" and not children[g["id"]] and g["state"] != "cancelled"
+        if g["kind"] == "task"
+        and not children[g["id"]]
+        and g["state"] != "cancelled"
+        and not g.get("historical_import")
     ]
     delivered = sum(verified[g["id"]] for g in leaves)
     delivery_durations = sorted(
@@ -274,7 +289,7 @@ def summarize_operations(data):
                 "numerator": delivered,
                 "denominator": len(leaves),
                 "definition": "Verified task outcomes / accepted task goals, excluding cancelled "
-                "tasks. Open tasks remain in the denominator.",
+                "tasks and historical imports. Open tasks remain in the denominator.",
             },
             "active_workers": len(active),
             "waiting": sum(g["state"] == "waiting" for g in goals),
@@ -282,6 +297,7 @@ def summarize_operations(data):
             "programs": sum(g["kind"] == "program" for g in goals),
             "projects": sum(g["kind"] == "project" for g in goals),
             "attempts": len(attempts),
+            "historical_imports": sum(bool(g.get("historical_import")) for g in goals),
             "retries": sum(max(0, n - 1) for n in attempts_per_goal.values()),
             "p95_attempt_seconds": latency,
             "latency_samples": len(durations),
@@ -301,7 +317,9 @@ def summarize_operations(data):
             "reserved_unpriced_usd": reservations,
             "cost_coverage": len(actual_costs) / len(attempts) if attempts else None,
             "cost_per_verified_task_usd": sum(actual_costs) / delivered
-            if delivered and not unknown_costs
+            if delivered
+            and not unknown_costs
+            and all(attempts_per_goal[g["id"]] for g in leaves if verified[g["id"]])
             else None,
             "pending_notifications": notifications.get("pending", 0),
         },

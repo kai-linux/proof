@@ -654,6 +654,12 @@
           ],
           ["Attempts", String(g.attempt_count)],
           [
+            "Measurement",
+            g.historical_import
+              ? "Reconciled historical outcome; excluded from live delivery-rate and timing KPIs"
+              : "Managed delivery observation",
+          ],
+          [
             "Deadline",
             g.deadline
               ? new Date(g.deadline).toLocaleString()
@@ -789,6 +795,8 @@
           " delivered tasks with a declared deadline";
         $("retries").textContent = m.retries;
         $("coverage").textContent =
+          (m.historical_imports || 0) +
+          " reconciled historical goals (excluded from live delivery-rate and timing KPIs). " +
           m.attempts +
           " managed attempts. " +
           m.pending_notifications +
